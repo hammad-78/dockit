@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "363346870774",
+    "project_id": "dockit-28c6a",
+    "storage_bucket": "dockit-28c6a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:363346870774:android:5b37dfa5cfbb2b616cc7d7",
+        "android_client_info": {
+          "package_name": "com.example.dockit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXiCi0vc8aqATt-zFvFYZZ0GNidJuc5U8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
