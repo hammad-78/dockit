@@ -1,5 +1,7 @@
+import 'package:dockit/presentation/screens/freelancer/add_project.dart';
 import 'package:flutter/material.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../profile.dart';
 
 class FreelancerHome extends StatefulWidget {
@@ -12,13 +14,39 @@ class FreelancerHome extends StatefulWidget {
 class _ProjectsScreenState extends State<FreelancerHome> {
   int _currentIndex = 0; // Tracks bottom navigation selection
 
-  // --- PLACEHOLDERS FOR YOUR REAL DATA ---
-  // Replace these lists with data fetched from your backend API or State Management
-  final List<Map<String, dynamic>> projects = [
-    {'title': 'Nova Cafe Branding', 'client': 'Ali Raza', 'pendingCount': 2},
-    {'title': 'Mobile App Design', 'client': 'Hina Tariq', 'pendingCount': 0},
-    {'title': 'Website Copy', 'client': 'Usman Sheikh', 'pendingCount': 1},
-  ];
+  late final Stream<List<Map<String, dynamic>>> _projectsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _projectsStream = _watchMyProjects();
+  }
+
+  Stream<List<Map<String, dynamic>>> _watchMyProjects() {
+    return FirebaseAuth.instance.authStateChanges().asyncExpand((user) {
+      final email = user?.email?.toLowerCase();
+      if (user == null || email == null) return const Stream.empty();
+
+      return FirebaseFirestore.instance
+          .collection('projects')
+          .doc(email)
+          .collection('userProjects')
+          .where('ownerId', isEqualTo: user.uid)
+          .snapshots()
+          .map(
+            (s) => s.docs.map((d) {
+              final data = d.data();
+              return {
+                'id': d.id,
+                'path': d.reference.path,
+                'title': data['name'] as String? ?? '',
+                'client': data['clientName'] as String? ?? 'No client yet',
+                'pendingCount': (data['pendingCount'] as num?)?.toInt() ?? 0,
+              };
+            }).toList(),
+          );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +80,6 @@ class _ProjectsScreenState extends State<FreelancerHome> {
                       size: 20,
                     ),
                   ),
-
                 ],
               ),
               const SizedBox(height: 16),
@@ -81,7 +108,12 @@ class _ProjectsScreenState extends State<FreelancerHome> {
                         size: 24,
                       ),
                       onPressed: () {
-                        // TODO: Add your create project logic here
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const NewProjectScreen(), // Navigate to the new project screen
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -89,109 +121,111 @@ class _ProjectsScreenState extends State<FreelancerHome> {
               ),
               const SizedBox(height: 24),
 
-              // 3. Subtitle Counter Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Active Deliverables',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  Text(
-                    '${projects.length} total', // Dynamic counter based on list length
-                    style: const TextStyle(fontSize: 14, color: Colors.black45),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // 4. Dynamic Project Cards List
               Expanded(
-                child: ListView.separated(
-                  itemCount: projects.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final project = projects[index];
-                    final int pending = project['pendingCount'];
+                child: StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: _projectsStream,
+                  builder: (context, snap) {
+                    if (snap.hasError) {
+                      return Center(
+                        child: Text(
+                          'Could not load projects\n${snap.error}',
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
+                    if (!snap.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final projects = snap.data!;
 
-                    return Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(51), // 0.02 * 255 = 51
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Left side: Text Details
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                project['title'],
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 3. Subtitle Counter Row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Active Deliverables',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black54,
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                project['client'],
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black45,
-                                ),
+                            ),
+                            Text(
+                              '${projects.length} total',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black45,
                               ),
-                            ],
-                          ),
-                          // Right side: Pending Indicators
-                          Row(
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  // Gray indicator if 0 pending, otherwise darker gray/black
-                                  color: pending > 0
-                                      ? Colors.black54
-                                      : Colors.black26,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // 4. Project cards
+                        Expanded(
+                          child: projects.isEmpty
+                              ? const Center(child: Text('No projects yet'))
+                              : ListView.separated(
+                                  itemCount: projects.length,
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(height: 12),
+                                  itemBuilder: (context, index) {
+                                    final project = projects[index];
+                                    final pending = project['pendingCount'] as int;
+
+                                    return Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(20),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF7F5F6),
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  project['title'] as String,
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 6),
+                                                Text(
+                                                  project['client'] as String,
+                                                  style: const TextStyle(
+                                                    color: Colors.black54,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          if (pending > 0)
+                                            Text(
+                                              '$pending pending',
+                                              style: const TextStyle(
+                                                color: Colors.black54,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    );
+                                  },
                                 ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '$pending pending',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: pending > 0
-                                      ? Colors.black54
-                                      : Colors.black26,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     );
                   },
                 ),
               ),
-
               // 5. Client Agreement Vault Footer Card
               Container(
                 width: double.infinity,
