@@ -1,4 +1,10 @@
-part of 'screens.dart';
+import 'package:dockit/presentation/auth/auth_service.dart';
+import 'package:flutter/material.dart';
+import '../../core/theme/app_theme.dart';
+import 'auth_ui.dart';
+import 'client/client_home.dart';
+import 'freelancer/freelancer_home.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => AppScaffold(
+  Widget build(BuildContext context) => AuthScaffold(
     title: 'Welcome back',
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,13 +54,13 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Text('or', style: TextStyle(color: AppColors.muted)),
         ),
         const SizedBox(height: 25),
-        const FieldLabel('Email'),
+        const AuthFieldLabel('Email'),
         TextField(
           controller: emailController,
           decoration: InputDecoration(hintText: 'sara@example.com'),
         ),
         const SizedBox(height: 22),
-        const FieldLabel('Password'),
+        const AuthFieldLabel('Password'),
         TextField(
           controller: passwordController,
           obscureText: true,
@@ -75,22 +81,39 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: 20),
         Center(
-          child: TextButton(
+          child: AuthPrimaryButton(
+            label: "Login",
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
-              );
+              AuthService.signInWithEmailAndPassword(
+                    emailController.text,
+                    passwordController.text,
+                  )
+                  .then((user) {
+                    if (user != null && context.mounted) {
+                      final destination = user.role == 'freelancer'
+                          ? const FreelancerHome()
+                          : const ClientHome();
+
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (_) => destination),
+                      );
+                    }
+                  })
+                  .catchError((error) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Login failed: $error')),
+                    );
+                  });
             },
-            child: const Text(
-              'Log in',
-              style: TextStyle(fontSize: 18, color: AppColors.ink),
-            ),
           ),
         ),
         const SizedBox(height: 20),
         Center(
           child: TextButton(
-            onPressed: () => push(context, const SignUpScreen()),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const SignUpScreen())),
             child: const Text(
               "Don't have an account? Sign up",
               style: TextStyle(fontSize: 16, color: AppColors.ink),

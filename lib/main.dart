@@ -1,4 +1,4 @@
-import 'package:dockit/presentation/screens/screens.dart';
+import 'package:dockit/presentation/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -10,7 +10,6 @@ void main() async {
   await GoogleSignIn.instance.initialize();
 
   runApp(MyApp());
-
 }
 
 class MyApp extends StatelessWidget {
@@ -20,9 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Dockit',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const SignUpScreen(),
     );
   }
