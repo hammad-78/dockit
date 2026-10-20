@@ -1,8 +1,9 @@
 import 'package:dockit/presentation/screens/freelancer/add_project.dart';
+import 'package:dockit/presentation/screens/freelancer/project_details.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../profile.dart';
+import 'package:dockit/presentation/screens/profile.dart';
 
 class FreelancerHome extends StatefulWidget {
   const FreelancerHome({super.key});
@@ -41,6 +42,13 @@ class _ProjectsScreenState extends State<FreelancerHome> {
                 'path': d.reference.path,
                 'title': data['name'] as String? ?? '',
                 'client': data['clientName'] as String? ?? 'No client yet',
+                'description': data['description'] as String? ?? '',
+                'status': data['status'] as String? ?? 'active',
+                'updatedAt': data['updatedAt'],
+                'clientKey': data['clientKey'] as String?,
+                'keyExpiresAt': data['keyExpiresAt'],
+                'memberLimit': (data['memberLimit'] as num?)?.toInt(),
+                'joinedMembers': (data['joinedMembers'] as num?)?.toInt() ?? 0,
                 'pendingCount': (data['pendingCount'] as num?)?.toInt() ?? 0,
               };
             }).toList(),
@@ -51,39 +59,32 @@ class _ProjectsScreenState extends State<FreelancerHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            // Image.asset(
+            //   'assets/images/dockit.png',
+            //   height: 22,
+            // ),
+            // const SizedBox(width: 8),
+            const Text(
+              'Dockit - Freelancer',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.white,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Top Profile Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Freelancer Profile',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: const Color(
-                      0xFF0A2540,
-                    ), // Deep blue profile icon bg
-                    child: const Icon(
-                      Icons.person_outline,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
               // 2. Title Row (Projects + Add Button)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -174,48 +175,52 @@ class _ProjectsScreenState extends State<FreelancerHome> {
                                       const SizedBox(height: 12),
                                   itemBuilder: (context, index) {
                                     final project = projects[index];
-                                    final pending = project['pendingCount'] as int;
+                                    final pending =
+                                        project['pendingCount'] as int;
 
                                     return Container(
                                       width: double.infinity,
-                                      padding: const EdgeInsets.all(20),
                                       decoration: BoxDecoration(
                                         color: const Color(0xFFF7F5F6),
                                         borderRadius: BorderRadius.circular(16),
                                       ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  project['title'] as String,
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 6),
-                                                Text(
-                                                  project['client'] as String,
-                                                  style: const TextStyle(
-                                                    color: Colors.black54,
-                                                  ),
-                                                ),
-                                              ],
+                                      child: ListTile(
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 20,
                                             ),
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  ProjectDetailsScreen(
+                                                    project: project,
+                                                  ),
+                                            ),
+                                          );
+                                        },
+                                        title: Text(
+                                          project['title'] as String,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
                                           ),
-                                          if (pending > 0)
-                                            Text(
-                                              '$pending pending',
-                                              style: const TextStyle(
-                                                color: Colors.black54,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                        ],
+                                        ),
+                                        subtitle: Text(
+                                          project['client'] as String,
+                                          style: const TextStyle(
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                        trailing: pending > 0
+                                            ? Text(
+                                                '$pending pending',
+                                                style: const TextStyle(
+                                                  color: Colors.black54,
+                                                  fontSize: 13,
+                                                ),
+                                              )
+                                            : null,
                                       ),
                                     );
                                   },
