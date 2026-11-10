@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dockit/presentation/screens/profile.dart';
-import 'package:dockit/presentation/screens/freelancer/upload_document.dart';
+import 'package:dockit/profile/profile.dart';
+import 'package:dockit/freelancer/upload_document.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

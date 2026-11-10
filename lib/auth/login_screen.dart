@@ -1,10 +1,10 @@
-import 'package:dockit/presentation/auth/auth_service.dart';
+import 'package:dockit/auth/auth_service.dart';
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart';
-import 'auth_ui.dart';
-import 'client/client_home.dart';
-import 'freelancer/freelancer_home.dart';
-import 'signup_screen.dart';
+import 'package:dockit/core/app_theme.dart';
+import 'package:dockit/auth/auth_ui.dart';
+import 'package:dockit/client/client_home.dart';
+import 'package:dockit/freelancer/freelancer_home.dart';
+import 'package:dockit/auth/signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

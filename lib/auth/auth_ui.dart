@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_theme.dart';
+import 'package:dockit/core/app_theme.dart';
 
 class AuthScaffold extends StatelessWidget {
   const AuthScaffold({super.key, required this.title, required this.child});

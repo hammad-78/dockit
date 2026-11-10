@@ -1,9 +1,9 @@
-import 'package:dockit/presentation/screens/freelancer/add_project.dart';
-import 'package:dockit/presentation/screens/freelancer/project_details.dart';
+import 'package:dockit/freelancer/add_project.dart';
+import 'package:dockit/freelancer/project_details.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:dockit/presentation/screens/profile.dart';
+import 'package:dockit/profile/profile.dart';
 
 class FreelancerHome extends StatefulWidget {
   const FreelancerHome({super.key});

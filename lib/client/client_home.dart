@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../profile.dart';
+import 'package:dockit/profile/profile.dart';
 
 class ClientHome extends StatefulWidget {
   const ClientHome({super.key});

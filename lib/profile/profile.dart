@@ -1,8 +1,8 @@
-import 'package:dockit/presentation/auth/auth_service.dart';
-import 'package:dockit/presentation/screens/login_screen.dart';
+import 'package:dockit/auth/auth_service.dart';
+import 'package:dockit/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_theme.dart';
+import 'package:dockit/core/app_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
